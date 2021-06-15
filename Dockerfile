@@ -1,0 +1,24 @@
+FROM centos:latest
+
+RUN cd /usr/local/bin && curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl && \
+  chmod +x kubectl &&\
+  mkdir /root/task && \
+  yum -y install java-11-openjdk-devel && \
+  yum -y install wget && \
+  rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key  && \
+  wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat-stable/jenkins.repo && \
+  yum install -y initscripts &&\
+  yum install sudo -y &&\
+  yum install net-tools -y &&\
+  yum install git jq -y && \
+  mkdir /root/YML &&\
+  yum install jenkins -y && \
+  sed -i '100i\jenkins ALL=(ALL)       NOPASSWD: ALL ' /etc/sudoers
+
+COPY ca.crt client.key client.crt /root/
+COPY config /root/.kube
+COPY php.yml pvc.yml service.yml /root/YML/
+
+EXPOSE 8080
+
+CMD ["java", "-jar", "/usr/lib/jenkins/jenkins.war"]

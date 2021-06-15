@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  php 
+  labels: 
+    env: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: php
+  template:
+    metadata:
+      name: php_pod
+      labels:
+        type: php
+    spec:
+      containers:
+        - image:  vimal13/apache-webserver-php
+          name:  php-con
+          imagePullPolicy: IfNotPresent 
+          volumeMounts:
+            - name: data-vol1
+              mountPath: /var/www/html
+            - name: log-vol2
+              mountPath: /var/log/httpd
+          ports:
+          - containerPort: 80
+
+      volumes:
+       - name: data-vol1
+         persistentVolumeClaim:
+             claimName: php-html-vol1
+
+       - name: log-vol2
+         persistentVolumeClaim
+             claimName: log-vol2
